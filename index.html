@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f3d6e">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png" sizes="192x192">
+  <title>Lexa Planner — Deep Blue · Soft Gray</title>
+  <style>
+    :root{
+      --deep-blue:#0f3d6e;
+      --deep-blue-600:#134a88;
+      --accent:#5aa9e6;
+      --soft-gray:#f4f6f8;
+      --ink:#1d2430;
+      --muted:#6b7280;
+      --card:#ffffff;
+      --border:#d5dbe3;
+      --danger:#d9685b;
+      --radius:18px;
+      --shadow:0 8px 24px rgba(15,61,110,.08), 0 2px 6px rgba(15,61,110,.05);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--ink); background:linear-gradient(180deg,var(--soft-gray),#fff 60%);
+    }
+    .app{max-width:960px; margin:0 auto; padding:24px;}
+    header{display:flex; align-items:center; gap:14px; margin-bottom:18px; padding:16px 0 8px;}
+    .logo{width:40px;height:40px;border-radius:12px;background:radial-gradient(100% 100% at 30% 20%, #7fc1ff 0, #4f9fe0 40%, var(--deep-blue) 100%); box-shadow:inset 0 0 0 2px rgba(255,255,255,.25)}
+    h1{font-size:20px; margin:0; letter-spacing:.3px}
+    .subtitle{color:var(--muted); font-size:13px}
+    .panel{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow)}
+    .grid{display:grid; grid-template-columns:1fr; gap:16px}
+    .toolbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:12px}
+    .btn{appearance:none; border:none; border-radius:14px; padding:10px 14px; font-weight:600; letter-spacing:.2px; cursor:pointer; background:var(--deep-blue); color:#fff; box-shadow:0 2px 0 rgba(0,0,0,.06)}
+    .btn.secondary{background:#eef3f8; color:var(--deep-blue); border:1px solid var(--border)}
+    .btn.ghost{background:transparent; color:var(--deep-blue); border:1px dashed var(--border)}
+    .btn:active{transform:translateY(1px)}
+    .input-area{padding:12px}
+    textarea{
+      width:100%; min-height:160px; resize:vertical; border-radius:14px; border:1px solid var(--border); padding:14px; background:#fbfcfe;
+      outline: none; box-shadow: inset 0 1px 0 #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    textarea::placeholder{color:#9aa6b2}
+    .timeline{position:relative; padding:18px 10px}
+    .timeline:before{content:""; position:absolute; left:44px; top:0; bottom:0; width:2px; background:linear-gradient(var(--border),#cfd6df);}
+    .card{position:relative; display:grid; grid-template-columns:110px 1fr; gap:12px; padding:12px; margin:8px 0 14px 0; background:var(--card); border:1px solid var(--border); border-left:6px solid var(--deep-blue); border-radius:14px; box-shadow:var(--shadow)}
+    .card.done{opacity:.6}
+    .card .title.done{text-decoration:line-through}
+    .time{font-weight:700; color:var(--deep-blue-600)}
+    .title{font-weight:700; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+    .chip{display:inline-flex; align-items:center; gap:6px; padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid var(--border); background:#f7fafc; color:#2d3748}
+    .chip.dot{width:8px; height:8px; border-radius:50%; display:inline-block; padding:0; border:none}
+    .meta{color:var(--muted); font-size:13px; margin-top:4px}
+    .dot{position:absolute; left:41px; top:18px; width:12px; height:12px; background:#fff; border:2px solid var(--deep-blue); border-radius:50%}
+    .actions{margin-top:8px; display:flex; gap:8px; flex-wrap:wrap}
+    .action{font-size:12px; padding:6px 10px; border-radius:10px; border:1px solid var(--border); background:#f8fbff; color:#0f3d6e; cursor:pointer}
+    .action:active{transform:translateY(1px)}
+    .litigation{border-left-color:#4f86c6}
+    .estate{border-left-color:#7aa7a6}
+    .personal{border-left-color:#9aa0a6}
+    .billing{border-left-color:#6f9e6d}
+    .urgent{border-left-color:#d9685b}
+    @media print{
+      .toolbar, .input-area, textarea, .actions { display:none !important; }
+      body { background:#fff; }
+      .app { max-width:800px; }
+      .panel { box-shadow:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>Lexa Planner</h1>
+        <div class="subtitle">Deep Blue · Soft Gray — MVP with Actions & Export</div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="panel">
+        <div class="toolbar">
+          <button class="btn" id="renderBtn">Render planner</button>
+          <button class="btn secondary" id="sampleBtn" title="Insert sample data">Sample</button>
+          <button class="btn ghost" id="clearBtn">Clear</button>
+        </div>
+        <div class="input-area">
+          <textarea id="raw" placeholder="Paste time blocks, one per line. Examples:
+08:30-09:15 Client conf. [Litigation] @Branch 53 #prep
+9:30–10:00 Team standup [Personal]
+10:15 to 11:45 Draft MR on RA 8974 [Litigation] #urgent
+13:00-14:00 Lunch w/ Alan [Personal]
+14:30-15:00 Review invoices [Billing]
+15:15-16:00 Estate mtg re TCTs [Estate]
+Optional fields: [Category], #tag, @location."></textarea>
+          <div class="subtitle" style="padding:8px 12px 14px">Tip: You can mix 12‑hour or 24‑hour times, and use -, –, —, or “to”.</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="toolbar" style="justify-content:space-between">
+          <div style="font-weight:700; color:var(--deep-blue-600)">Today · <span id="today">Wednesday, August 27, 2025</span></div>
+          <div style="display:flex; gap:8px; align-items:center">
+            <button class="btn secondary" id="copyBtn" title="Copy timeline text">Copy</button>
+            <button class="btn secondary" id="pdfBtn" title="Export to PDF (Print)">Export PDF</button>
+            <div id="summary" class="meta"></div>
+          </div>
+        </div>
+        <div id="timeline" class="timeline">
+          <div class="empty">Your planner will appear here.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const byId = (id)=>document.getElementById(id);
+
+    function parseLine(line){
+      const sep = "(?:-|–|—| to )";
+      const time = "(\d{1,2})(?::(\d{2}))?\s*(am|pm|AM|PM)?";
+      const re = new RegExp(`^\s*${time}\s*${sep}\s*${time}\s+(.+?)\s*$`);
+      const m = line.match(re);
+      if(!m) return null;
+      const [_, h1, m1="00", ap1="", h2, m2="00", ap2="", rest] = m;
+      const start = toMinutes(h1, m1, ap1);
+      const end = toMinutes(h2, m2, ap2);
+      let title = rest.trim();
+      let category = null, tags=[], location=null;
+      const cat = title.match(/\[(.+?)\]/);
+      if(cat){ category = cat[1].trim(); title = title.replace(cat[0], '').trim(); }
+      title = title.replace(/#(\S+)/g, (__,t)=>{ tags.push(t); return '' }).trim();
+      const locMatch = title.match(/@(\S[\w\s\-.,/()]*)$/);
+      if(locMatch){ location = locMatch[1].trim(); title = title.replace(locMatch[0],'').trim(); }
+      return { start, end, title, category, tags, location };
+    }
+
+    function toMinutes(h, m, ap){
+      let hh = parseInt(h,10); const mm = parseInt(m||"0",10);
+      if(ap){
+        const p = ap.toLowerCase();
+        if(p==="pm" && hh!==12) hh += 12;
+        if(p==="am" && hh===12) hh = 0;
+      }
+      return hh*60+mm;
+    }
+
+    function fmt(min){
+      const h = Math.floor(min/60), m = min%60;
+      const ap = h>=12?"PM":"AM";
+      const hr = (h%12)||12;
+      return `${hr}:${m.toString().padStart(2,'0')} ${ap}`;
+    }
+
+    function categoryClass(cat){
+      if(!cat) return '';
+      const k = cat.toLowerCase();
+      if(k.includes('litig')) return 'litigation';
+      if(k.includes('estate')) return 'estate';
+      if(k.includes('bill')) return 'billing';
+      if(k.includes('urgent')) return 'urgent';
+      if(k.includes('person')) return 'personal';
+      return '';
+    }
+
+    function categoryColor(cat){
+      const k = (cat||'').toLowerCase();
+      if(k.includes('litig')) return '#4f86c6';
+      if(k.includes('estate')) return '#7aa7a6';
+      if(k.includes('bill')) return '#6f9e6d';
+      if(k.includes('urgent')) return '#d9685b';
+      if(k.includes('person')) return '#9aa0a6';
+      return '#d5dbe3';
+    }
+
+    let items = [];
+
+    function render(lines){
+      items = [];
+      for(const raw of lines){
+        const line = raw.trim();
+        if(!line) continue;
+        const it = parseLine(line);
+        if(it) items.push(it);
+      }
+      items.sort((a,b)=>a.start-b.start);
+      const host = byId('timeline');
+      host.innerHTML = '';
+      if(!items.length){
+        host.innerHTML = '<div class="empty">Nothing to show. Paste time blocks on the left and tap <b>Render planner</b>.</div>';
+        byId('summary').textContent='';
+        return;
+      }
+      const totalMins = items.reduce((s,i)=>s+(i.end-i.start),0);
+      byId('summary').textContent = `${items.length} block${items.length>1?'s':''} · ${Math.round(totalMins/60)}h ${totalMins%60}m`;
+
+      items.forEach((it, idx)=>{
+        const card = document.createElement('div');
+        card.className = `card ${categoryClass(it.category)}`;
+        card.dataset.index = idx;
+        const chipHtml = it.category ? `<span class="chip"><span class="chip dot" style="background:${categoryColor(it.category)}"></span>${escapeHtml(it.category)}</span>` : '';
+        card.innerHTML = `
+          <span class="dot" aria-hidden="true"></span>
+          <div class="time">${fmt(it.start)}–${fmt(it.end)}</div>
+          <div>
+            <div class="title">${escapeHtml(it.title)} ${chipHtml}</div>
+            <div class="meta">${[it.location?`@ ${escapeHtml(it.location)}`:null, it.tags.length?`#${it.tags.join(' #')}`:null].filter(Boolean).join(' · ')}</div>
+            <div class="actions">
+              <button class="action" data-act="done">✅ Done</button>
+              <button class="action" data-act="move">⏭ Move</button>
+              <button class="action" data-act="remind">⏰ Remind</button>
+            </div>
+          </div>`;
+        host.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str){
+      return str.replace(/[&<>"']/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[s]));
+    }
+
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.action');
+      if(!btn) return;
+      const card = btn.closest('.card');
+      const idx = parseInt(card.dataset.index,10);
+      const it = items[idx];
+      const act = btn.dataset.act;
+      if(act==='done'){ toggleDone(card); }
+      if(act==='move'){ moveBlock(card, it, idx); }
+      if(act==='remind'){ remind(it, card); }
+    });
+
+    function toggleDone(card){
+      card.classList.toggle('done');
+      const title = card.querySelector('.title');
+      title.classList.toggle('done');
+    }
+
+    function moveBlock(card, it, idx){
+      const input = prompt("New time range for this block (e.g., 2:30-3:15 PM or 14:30-15:15):", "");
+      if(!input) return;
+      const m = input.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*[^\d]+\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i);
+      if(!m) return alert("Couldn't read that. Try formats like '2:30-3:15 PM' or '14:30-15:15'.");
+      const parseAny = (s)=>{ const p=s.trim().match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i); if(!p) return null; return toMinutes(p[1], p[2]||'00', p[3]||''); };
+      const s = parseAny(m[1]), e = parseAny(m[2]);
+      if(s==null || e==null) return alert("Invalid time.");
+      it.start = s; it.end = e;
+      const raw = byId('raw').value.split(/\n+/);
+      render(raw);
+    }
+
+    async function remind(it, card){
+      const offsetStr = prompt("Remind how many minutes before start? (e.g., 10)", "10");
+      const offsetMin = Math.max(0, parseInt(offsetStr||"0",10));
+      const now = new Date();
+      const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Math.floor(it.start/60), it.start%60, 0, 0);
+      const when = target.getTime() - (offsetMin*60000);
+      const delay = Math.max(0, when - Date.now());
+      if(!('Notification' in window)) { alert('Notifications not supported on this device/browser.'); return; }
+      const perm = await Notification.requestPermission();
+      if(perm!=='granted') { alert('Notification permission was denied.'); return; }
+      setTimeout(()=>{ new Notification('Lexa Reminder', { body: `${fmt(it.start)} — ${it.title}` }); card.classList.add('reminder-set'); }, delay);
+      alert("Reminder set" + (delay>0? " for later today.":" for now."));
+    }
+
+    byId('copyBtn').addEventListener('click', async ()=>{
+      const text = items.map(i=>`${fmt(i.start)}–${fmt(i.end)}  ${i.title}${i.category?` [${i.category}]`:''}${i.location?` @ ${i.location}`:''}`).join('\n');
+      try{ await navigator.clipboard.writeText(text); alert('Copied to clipboard.'); }catch{ alert('Copy failed. You can select and copy manually.'); }
+    });
+    byId('pdfBtn').addEventListener('click', ()=>{ window.print(); });
+
+    byId('renderBtn').addEventListener('click', ()=>{
+      const lines = byId('raw').value.split(/\n+/);
+      render(lines);
+      document.querySelector('#timeline').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    byId('clearBtn').addEventListener('click', ()=>{
+      byId('raw').value='';
+      byId('timeline').innerHTML = '<div class="empty">Your planner will appear here.</div>';
+      byId('summary').textContent='';
+      byId('raw').focus();
+    });
+    byId('sampleBtn').addEventListener('click', ()=>{
+      byId('raw').value = SAMPLE.trim();
+      byId('renderBtn').click();
+    });
+
+    const SAMPLE = `08:30-09:15 Client conf. [Litigation] @RTC Branch 53 #prep
+9:30–10:00 Team standup [Personal]
+10:15 to 11:45 Draft MR citing RA 8974 [Litigation] #urgent
+12:00-13:00 Lunch w/ Alan [Personal] @Ayala Mall
+14:00—14:40 Review invoices [Billing]
+15:00-16:00 Estate mtg re TCTs [Estate] @GRDC`;
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch(console.error);
+      });
+    }
+  </script>
+</body>
+</html>
