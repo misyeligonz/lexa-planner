@@ -123,23 +123,48 @@ Optional fields: [Category], #tag, @location."></textarea>
     const byId = (id)=>document.getElementById(id);
 
     function parseLine(line){
-      const sep = "(?:-|–|—| to )";
-      const time = "(\d{1,2})(?::(\d{2}))?\s*(am|pm|AM|PM)?";
-      const re = new RegExp(`^\s*${time}\s*${sep}\s*${time}\s+(.+?)\s*$`);
-      const m = line.match(re);
-      if(!m) return null;
-      const [_, h1, m1="00", ap1="", h2, m2="00", ap2="", rest] = m;
-      const start = toMinutes(h1, m1, ap1);
-      const end = toMinutes(h2, m2, ap2);
-      let title = rest.trim();
-      let category = null, tags=[], location=null;
-      const cat = title.match(/\[(.+?)\]/);
-      if(cat){ category = cat[1].trim(); title = title.replace(cat[0], '').trim(); }
-      title = title.replace(/#(\S+)/g, (__,t)=>{ tags.push(t); return '' }).trim();
-      const locMatch = title.match(/@(\S[\w\s\-.,/()]*)$/);
-      if(locMatch){ location = locMatch[1].trim(); title = title.replace(locMatch[0],'').trim(); }
-      return { start, end, title, category, tags, location };
-    }
+  if(!line) return null;
+
+  // Normalize common variations
+  let s = line.replace(/\u00A0/g, ' ').trim(); // NBSP → space
+
+  // Convert em/en dashes to hyphen and “ to ” to hyphen
+  s = s
+    .replace(/[—–−]/g, '-')        // em/en/minus → hyphen
+    .replace(/\s+to\s+/i, '-')     // " to " → "-"
+    .replace(/\s*-\s*-\s*/g, '-')  // "--" → "-"
+    .replace(/^\s+|\s+$/g, '');
+
+  // Optional decorative dash after the time range:
+  // "09:30-10:15 — Title" or "09:30 - 10:15 - Title"
+  s = s.replace(/^(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*-\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*[—-]?\s+/i,
+                '$1-$2 ');
+
+  // TIME RANGE + at least one space + title
+  const time = '(\\d{1,2})(?::(\\d{2}))?\\s*(am|pm)?';
+  const re = new RegExp(`^\\s*${time}\\s*-\\s*${time}\\s+(.+?)\\s*$`, 'i');
+  const m = s.match(re);
+  if(!m) return null;
+
+  const [_, h1, m1="00", ap1="", h2, m2="00", ap2="", rest] = m;
+  const start = toMinutes(h1, m1, ap1 || '');
+  const end   = toMinutes(h2, m2, ap2 || '');
+
+  // Extract [Category], #tags, @location (at end)
+  let title = rest.trim();
+  let category = null, tags = [], location = null;
+
+  const cat = title.match(/\[(.+?)\]/);
+  if (cat) { category = cat[1].trim(); title = title.replace(cat[0], '').trim(); }
+
+  title = title.replace(/#(\S+)/g, (_,$1)=>{ tags.push($1); return ''; }).trim();
+
+  const locMatch = title.match(/@(\S[\w\s\-.,/()]*)$/);
+  if (locMatch) { location = locMatch[1].trim(); title = title.replace(locMatch[0], '').trim(); }
+
+  return { start, end, title, category, tags, location };
+}
+
 
     function toMinutes(h, m, ap){
       let hh = parseInt(h,10); const mm = parseInt(m||"0",10);
