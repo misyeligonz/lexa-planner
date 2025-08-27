@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'lexa-planner-v2';
+const CACHE_NAME = 'lexa-v3.0';
 const ASSETS = [
   './',
   './index.html',
