@@ -36,7 +36,7 @@
     .timeline:before{content:"";position:absolute;left:44px;top:0;bottom:0;width:2px;background:linear-gradient(var(--border),#cfd6df)}
     .card{position:relative;display:grid;grid-template-columns:110px 1fr;gap:12px;padding:12px;margin:8px 0 14px;background:var(--card);border:1px solid var(--border);border-left:6px solid var(--deep-blue);border-radius:14px;box-shadow:var(--shadow)}
     .card.done{opacity:.6}.card .title.done{text-decoration:line-through}
-    .time {font-weight: 700;color: var(--deep-blue-600);font-family: 'Courier New', monospace; /* ensures 0 looks normal */letter-spacing: 0.5px;}
+    .time {font-weight: 700;color:var(--deep-blue-600);font-family:'Roboto Mono','Courier New',monospace;/* clean zero */font-variant-numeric: tabular-nums; /* align numbers evenly */letter-spacing: 0.5px;}
     .title{font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
     .meta{color:var(--muted);font-size:13px;margin-top:4px}
     .dot{position:absolute;left:41px;top:18px;width:12px;height:12px;background:#fff;border:2px solid var(--deep-blue);border-radius:50%}
@@ -45,6 +45,7 @@
     .action:active{transform:translateY(1px)}
     @media print{.toolbar,.input-area,textarea,.actions{display:none!important}body{background:#fff}.app{max-width:800px}.panel{box-shadow:none}}
   </style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="app">
