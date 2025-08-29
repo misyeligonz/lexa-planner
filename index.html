@@ -64,18 +64,18 @@
       <div class="logo" aria-hidden="true"></div>
       <div>
         <h1>Lexa Planner</h1>
-        <div class="subtitle">Deep Blue · Soft Gray — v3.1 · Friday, August 29, 2025</div>
+        <div class="subtitle">Deep Blue · Soft Gray — v3.1.2</div>
       </div>
     </header>
 
     <div class="grid">
-      <!-- TOP panel with Copy/PDF -->
+      <!-- Top panel (Copy/PDF + summary) -->
       <section class="panel">
         <div class="toolbar-top">
           <div style="font-weight:700; color:var(--deep-blue-600)">Today</div>
           <div style="display:flex; gap:8px; align-items:center">
-            <button class="btn secondary" id="copyBtn" title="Copy timeline text">Copy</button>
-            <button class="btn secondary" id="pdfBtn" title="Export to PDF (Print)">PDF</button>
+            <button class="btn secondary" id="copyBtn">Copy</button>
+            <button class="btn secondary" id="pdfBtn">PDF</button>
             <div id="summary" class="meta"></div>
           </div>
         </div>
@@ -84,20 +84,20 @@
         </div>
       </section>
 
-      <!-- INPUT panel -->
+      <!-- Input panel -->
       <section class="panel">
         <div class="input-area">
           <textarea id="raw" placeholder="Paste time blocks, one per line.
 Use semicolons “;” for subtasks, e.g.
 09:30–10:15 Warm-up Admin — 1 invoice; demand letter; skim inbox
 Optional: [Category], @location at end, #tags anywhere."></textarea>
-          <div class="subtitle" style="padding:8px 12px 14px">Tip: You can mix 12‑hour or 24‑hour times, and use -, –, —, or “to”.</div>
+          <div class="subtitle" style="padding:8px 12px 14px">Tip: You can mix 12-hour or 24-hour times, and use -, –, —, or “to”.</div>
         </div>
       </section>
     </div>
   </div>
 
-  <!-- Bottom toolbar (fixed) -->
+  <!-- Bottom toolbar -->
   <div class="toolbar-bottom">
     <div class="row">
       <button class="btn" id="renderBtn">Render</button>
@@ -113,11 +113,11 @@ Optional: [Category], @location at end, #tags anywhere."></textarea>
   </div>
 
   <script>
+  (function (){
+    // --------- Helpers (dates / storage) ----------
     const $ = (id)=>document.getElementById(id);
-
-    // === Date helpers & keys ===
     const STORAGE_PREFIX = 'lexa:plan:';
-    function toISODate(d){const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${dd}`; }
+    function toISODate(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${dd}`; }
     function todayKey(){ return toISODate(new Date()); }
     function addDays(iso, delta){ const d=new Date(iso); d.setDate(d.getDate()+delta); return toISODate(d); }
 
@@ -130,47 +130,43 @@ Optional: [Category], @location at end, #tags anywhere."></textarea>
     function saveChecksMap(iso, map){ localStorage.setItem(kChecks(iso), JSON.stringify(map)); }
     function loadChecksMap(iso){ try { return JSON.parse(localStorage.getItem(kChecks(iso))||'{}'); } catch { return {}; } }
 
-    // App state
+    // --------- State ----------
     let items = [];
     let originalLines = [];
     let selectedISO = todayKey();
     let checksMap = loadChecksMap(selectedISO);
 
-    // Time helpers
+    // --------- Time & parsing ----------
     function toMin(h, m, ap){
       let hh = parseInt(h||'0',10), mm = parseInt(m||'0',10);
       const p = (ap||'').toLowerCase();
-      if(p==='pm' && hh!==12) hh+=12;
-      if(p==='am' && hh===12) hh=0;
+      if (p==='pm' && hh!==12) hh+=12;
+      if (p==='am' && hh===12) hh=0;
       return hh*60+mm;
     }
     function fmt(min){
       const h = Math.floor(min/60), m = min % 60;
       const ap = h >= 12 ? 'PM' : 'AM';
-      const hr24 = h % 24;
-      const hr12 = (hr24 % 12) || 12;
-      const hr = String(hr12).padStart(2,'0');
-      return `${hr}:${String(m).padStart(2,'0')} ${ap}`;
+      const hr12 = ((h % 24) % 12) || 12;
+      return `${String(hr12).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ap}`;
     }
-    function padTime24(min){
+    function pad24(min){
       const h = Math.floor(min/60), m = min % 60;
       return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
     }
     function serializeItem(it){
-      const left = `${padTime24(it.start)}-${padTime24(it.end)}`;
+      const left = `${pad24(it.start)}-${pad24(it.end)}`;
       const parts = [it.title];
-      if(it.category) parts.push(`[${it.category}]`);
-      if(it.location) parts.push(`@${it.location}`);
-      if(it.tags && it.tags.length) parts.push(it.tags.map(t=>`#${t}`).join(' '));
+      if (it.category) parts.push(`[${it.category}]`);
+      if (it.location) parts.push(`@${it.location}`);
+      if (it.tags?.length) parts.push(it.tags.map(t=>`#${t}`).join(' '));
       return `${left} ${parts.filter(Boolean).join(' ')}`.trim();
     }
-
-    // Parser (forgiving + subtasks)
     function parseLine(line){
       if(!line) return null;
-      let s = line.replace(/\u00A0/g, ' ').trim();
-      s = s.replace(/[—–−]/g, '-').replace(/\s+to\s+/i, '-').replace(/\s*-\s*-\s*/g, '-').replace(/^\s+|\s+$/g, '');
-      s = s.replace(/^(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*-\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*[-]?\s+/i, '$1-$2 ');
+      let s = line.replace(/\u00A0/g,' ').trim();
+      s = s.replace(/[—–−]/g,'-').replace(/\s+to\s+/i,'-').replace(/\s*-\s*-\s*/g,'-').trim();
+      s = s.replace(/^(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*-\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*-?\s+/i,'$1-$2 ');
       const re = /^\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*-\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s+(.+?)\s*$/i;
       const m = s.match(re);
       if(!m) return null;
@@ -184,8 +180,9 @@ Optional: [Category], @location at end, #tags anywhere."></textarea>
       if(cat){ category=cat[1].trim(); title=title.replace(cat[0],'').trim(); }
       title = title.replace(/#(\S+)/g, (_,$1)=>{ tags.push($1); return ''; }).trim();
       const loc = title.match(/@(\S[\w\s\-.,/()]*)$/);
-      if(loc){ location = loc[1].trim(); title = title.replace(loc[0],'').trim(); }
+      if(loc){ location=loc[1].trim(); title=title.replace(loc[0],'').trim(); }
 
+      // Subtasks via semicolons
       let mainTitle = title, subtasks = [];
       const dashSplit = title.split(/\s-\s/);
       if (dashSplit.length > 1 && dashSplit.slice(1).join(' - ').includes(';')) {
@@ -197,12 +194,11 @@ Optional: [Category], @location at end, #tags anywhere."></textarea>
         mainTitle = parts.shift() || title;
         subtasks = parts;
       }
-
       return { start, end, title: mainTitle, subtasks, category, tags, location };
     }
+    function escapeHtml(str){ return str.replace(/[&<>\"']/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[s])); }
 
-    function escapeHtml(str){ return str.replace(/[&<>"']/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\":"&quot;","'":"&#39;"}[s])); }
-
+    // --------- Render ----------
     function render(lines){
       originalLines = lines.slice();
       items = [];
@@ -211,16 +207,15 @@ Optional: [Category], @location at end, #tags anywhere."></textarea>
         const it = parseLine(t);
         if(it){ it.lineIndex = i; items.push(it); }
       });
-
       items.sort((a,b)=>a.start-b.start);
 
-      const host = document.getElementById('timeline'); host.innerHTML='';
+      const host = $('timeline'); host.innerHTML='';
       if(!items.length){
-        host.innerHTML='<div class="empty">Nothing to show. Paste time blocks on the left and tap <b>Render</b>.</div>';
-        document.getElementById('summary').textContent=''; return;
+        host.innerHTML='<div class="empty">Nothing to show. Paste time blocks and tap <b>Render</b>.</div>';
+        $('summary').textContent=''; return;
       }
       const total=items.reduce((s,i)=>s+(i.end-i.start),0);
-      document.getElementById('summary').textContent = `${items.length} block${items.length>1?'s':''} · ${Math.floor(total/60)}h ${total%60}m`;
+      $('summary').textContent = `${items.length} block${items.length>1?'s':''} · ${Math.floor(total/60)}h ${total%60}m`;
 
       const stored = loadChecksMap(selectedISO);
       items.forEach((it, idx)=>{
@@ -232,10 +227,7 @@ Optional: [Category], @location at end, #tags anywhere."></textarea>
         if(it.subtasks && it.subtasks.length){
           const list = it.subtasks.map((st, si)=>{
             const checked=!!subChecks[si];
-            return `<li>
-                      <input type="checkbox" class="subtask" data-si="${si}" ${checked?'checked':''}>
-                      <span class="st-label ${checked?'st-done':''}">${escapeHtml(st)}</span>
-                    </li>`;
+            return `<li><input type="checkbox" class="subtask" data-si="${si}" ${checked?'checked':''}><span class="st-label ${checked?'st-done':''}">${escapeHtml(st)}</span></li>`;
           }).join('');
           subtasksHtml = `<ul class="subtasks">${list}</ul>`;
         }
@@ -253,8 +245,7 @@ Optional: [Category], @location at end, #tags anywhere."></textarea>
               <button class="action" data-act="remind">⏰ Remind</button>
             </div>
           </div>`;
-
-        if(it.subtasks && it.subtasks.length){
+        if(it.subtasks?.length){
           const all = it.subtasks.every((_,si)=>!!subChecks[si]);
           if(all){ card.classList.add('done'); card.querySelector('.title').classList.add('done'); }
         } else if(lineStore.done){ card.classList.add('done'); card.querySelector('.title').classList.add('done'); }
@@ -262,152 +253,148 @@ Optional: [Category], @location at end, #tags anywhere."></textarea>
       });
     }
 
-    // Subtask changes
-    document.addEventListener('change', (e)=>{
-      const box = e.target.closest('input.subtask'); if(!box) return;
-      const card = box.closest('.card'); const idx = +card.dataset.index; const it = items[idx];
-      const label = box.nextElementSibling; if(label) label.classList.toggle('st-done', box.checked);
+    // --------- Bind after window load ----------
+    window.addEventListener('load', () => {
+      // Subtask toggles
+      document.addEventListener('change', (e)=>{
+        const box = e.target.closest('input.subtask'); if(!box) return;
+        const card = box.closest('.card'); const idx = +card.dataset.index; const it = items[idx];
+        const si = +box.dataset.si;
+        const label = box.nextElementSibling; if(label) label.classList.toggle('st-done', box.checked);
 
-      const si = +box.dataset.si;
-      checksMap[it.lineIndex] = checksMap[it.lineIndex] || { sub: {} };
-      checksMap[it.lineIndex].sub = checksMap[it.lineIndex].sub || {};
-      checksMap[it.lineIndex].sub[si] = box.checked;
+        checksMap[it.lineIndex] = checksMap[it.lineIndex] || { sub: {} };
+        checksMap[it.lineIndex].sub = checksMap[it.lineIndex].sub || {};
+        checksMap[it.lineIndex].sub[si] = box.checked;
 
-      const boxes = card.querySelectorAll('input.subtask'); const all = [...boxes].every(b=>b.checked);
-      card.classList.toggle('done', all);
-      card.querySelector('.title').classList.toggle('done', all);
-      if(!boxes.length){ checksMap[it.lineIndex].done = all; }
-      saveChecksMap(selectedISO, checksMap);
-    });
-
-    // Actions
-    document.addEventListener('click', async (e)=>{
-      const btn = e.target.closest('.action'); if(!btn) return;
-      const card = btn.closest('.card'); const idx = +card.dataset.index; const it = items[idx];
-      const act = btn.dataset.act;
-      if(act==='done'){
-        const boxes = card.querySelectorAll('input.subtask');
-        if(boxes.length){
-          const anyUnchecked = [...boxes].some(b=>!b.checked);
-          boxes.forEach((b,si)=>{
-            b.checked = anyUnchecked;
-            const lbl = b.nextElementSibling; if(lbl) lbl.classList.toggle('st-done', anyUnchecked);
-            checksMap[it.lineIndex] = checksMap[it.lineIndex] || { sub: {} };
-            checksMap[it.lineIndex].sub = checksMap[it.lineIndex].sub || {};
-            checksMap[it.lineIndex].sub[si] = anyUnchecked;
-          });
-          card.classList.toggle('done', anyUnchecked);
-          card.querySelector('.title').classList.toggle('done', anyUnchecked);
-        } else {
-          const willBe = !card.classList.contains('done');
-          card.classList.toggle('done', willBe);
-          card.querySelector('.title').classList.toggle('done', willBe);
-          checksMap[it.lineIndex] = checksMap[it.lineIndex] || {};
-          checksMap[it.lineIndex].done = willBe;
-        }
+        const all = [...card.querySelectorAll('input.subtask')].every(b=>b.checked);
+        card.classList.toggle('done', all);
+        card.querySelector('.title').classList.toggle('done', all);
+        if(!it.subtasks?.length){ checksMap[it.lineIndex].done = all; }
         saveChecksMap(selectedISO, checksMap);
-      }
-      if(act==='move'){
-        const input = prompt("New time range (e.g., 6:30-7:00 PM or 18:30-19:00):","");
-        if(!input) return;
-        const m = input.replace(/[—–]/g,'-').match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*[^0-9]+\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i);
-        if(!m) return alert("Try formats like '6:30-7:00 PM' or '18:30-19:00'.");
-        const parseAny = (s)=>{ const p=s.trim().match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i); if(!p) return null; return toMin(p[1], p[2]||'00', p[3]||''); };
-        const sMin = parseAny(m[1]), eMin = parseAny(m[2]);
-        if(sMin==null || eMin==null) return alert("Invalid time.");
-        it.start = sMin; it.end = eMin;
-        const lineIdx = it.lineIndex;
-        if(lineIdx!=null && lineIdx>=0){
-          originalLines[lineIdx] = serializeItem(it);
-          document.getElementById('raw').value = originalLines.join('\n');
-          saveRawText(selectedISO, document.getElementById('raw').value);
-        }
-        render(originalLines);
-        return;
-      }
-      if(act==='remind'){
-        const offsetStr = prompt("Remind how many minutes before start?","10");
-        const offsetMin = Math.max(0, parseInt(offsetStr||"0",10));
-        if(!('Notification' in window)) return alert('Notifications not supported.');
-        const perm = await Notification.requestPermission();
-        if(perm!=='granted') return alert('Notification permission was denied.');
-        const now=new Date();
-        const when = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Math.floor(it.start/60), it.start%60).getTime() - offsetMin*60000;
-        const delay = Math.max(0, when - Date.now());
-        setTimeout(()=> new Notification('Lexa Reminder', { body: `${fmt(it.start)} — ${it.title}` }), delay);
-        alert('Reminder set.');
-      }
-    });
+      });
 
-    // Buttons
-    document.getElementById('renderBtn').addEventListener('click', ()=>{
-      const raw = document.getElementById('raw').value;
-      saveRawText(selectedISO, raw);
-      render(raw.split(/\n+/));
-      document.getElementById('timeline').scrollIntoView({behavior:'smooth',block:'start'});
-    });
-    document.getElementById('sampleBtn').addEventListener('click', ()=>{
-      const SAMPLE = `08:30-09:15 Client conf. [Litigation] @RTC Branch 53 #prep
+      // Card actions
+      document.addEventListener('click', async (e)=>{
+        const btn = e.target.closest('.action'); if(!btn) return;
+        const card = btn.closest('.card'); const idx = +card.dataset.index; const it = items[idx];
+        if(btn.dataset.act==='done'){
+          const boxes = card.querySelectorAll('input.subtask');
+          if(boxes.length){
+            const anyUnchecked = [...boxes].some(b=>!b.checked);
+            boxes.forEach((b,si)=>{
+              b.checked = anyUnchecked;
+              const lbl = b.nextElementSibling; if(lbl) lbl.classList.toggle('st-done', anyUnchecked);
+              checksMap[it.lineIndex] = checksMap[it.lineIndex] || { sub: {} };
+              checksMap[it.lineIndex].sub = checksMap[it.lineIndex].sub || {};
+              checksMap[it.lineIndex].sub[si] = anyUnchecked;
+            });
+            card.classList.toggle('done', anyUnchecked);
+            card.querySelector('.title').classList.toggle('done', anyUnchecked);
+          } else {
+            const willBe = !card.classList.contains('done');
+            card.classList.toggle('done', willBe);
+            card.querySelector('.title').classList.toggle('done', willBe);
+            checksMap[it.lineIndex] = checksMap[it.lineIndex] || {};
+            checksMap[it.lineIndex].done = willBe;
+          }
+          saveChecksMap(selectedISO, checksMap);
+          return;
+        }
+        if(btn.dataset.act==='move'){
+          const input = prompt("New time range (e.g., 6:30-7:00 PM or 18:30-19:00):","");
+          if(!input) return;
+          const m = input.replace(/[—–]/g,'-').match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*[^0-9]+\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i);
+          if(!m) return alert("Try formats like '6:30-7:00 PM' or '18:30-19:00'.");
+          const parseAny = (s)=>{ const p=s.trim().match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i); if(!p) return null; return toMin(p[1], p[2]||'00', p[3]||''); };
+          const sMin = parseAny(m[1]), eMin = parseAny(m[2]);
+          if(sMin==null || eMin==null) return alert("Invalid time.");
+          it.start = sMin; it.end = eMin;
+
+          // write back to textarea + save
+          const lineIdx = it.lineIndex;
+          if(lineIdx!=null && lineIdx>=0){
+            originalLines[lineIdx] = serializeItem(it);
+            $('raw').value = originalLines.join('\n');
+            saveRawText(selectedISO, $('raw').value);
+          }
+          render(originalLines);
+          return;
+        }
+        if(btn.dataset.act==='remind'){
+          const offsetStr = prompt("Remind how many minutes before start?","10");
+          const offsetMin = Math.max(0, parseInt(offsetStr||"0",10));
+          if(!('Notification' in window)) return alert('Notifications not supported.');
+          const perm = await Notification.requestPermission();
+          if(perm!=='granted') return alert('Notification permission was denied.');
+          const now = new Date();
+          const when = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Math.floor(it.start/60), it.start%60).getTime() - offsetMin*60000;
+          const delay = Math.max(0, when - Date.now());
+          setTimeout(()=> new Notification('Lexa Reminder', { body: `${fmt(it.start)} — ${it.title}` }), delay);
+          alert('Reminder set.');
+        }
+      });
+
+      // Bottom toolbar
+      $('renderBtn').addEventListener('click', ()=>{
+        const raw = $('raw').value;
+        saveRawText(selectedISO, raw);
+        render(raw.split(/\n+/));
+        $('timeline').scrollIntoView({behavior:'smooth',block:'start'});
+      });
+      $('sampleBtn').addEventListener('click', ()=>{
+        $('raw').value = `08:30-09:15 Client conf. [Litigation] @RTC Branch 53 #prep
 9:30–10:00 Team standup [Personal]
 10:15 to 11:45 Draft MR citing RA 8974 [Litigation] #urgent
 12:00-13:00 Lunch w/ Alan [Personal] @Ayala Mall
 14:00—14:40 Review invoices [Billing]
 15:00-16:00 Estate mtg re TCTs [Estate] @GRDC`;
-      document.getElementById('raw').value = SAMPLE;
-    });
-    document.getElementById('clearBtn').addEventListener('click', ()=>{
-      document.getElementById('raw').value='';
-      document.getElementById('timeline').innerHTML='<div class="empty">Your planner will appear here.</div>';
-      document.getElementById('summary').textContent='';
-      checksMap = {};
-      localStorage.removeItem(kRaw(selectedISO));
-      localStorage.removeItem(kChecks(selectedISO));
-      document.getElementById('raw').focus();
-    });
-    document.getElementById('copyBtn').addEventListener('click', async ()=>{
-      const text = document.getElementById('timeline').innerText || '';
-      try{ await navigator.clipboard.writeText(text); alert('Copied to clipboard.'); }catch{ alert('Copy failed.'); }
-    });
-    document.getElementById('pdfBtn').addEventListener('click', ()=>window.print());
+      });
+      $('clearBtn').addEventListener('click', ()=>{
+        $('raw').value=''; $('timeline').innerHTML='<div class="empty">Your planner will appear here.</div>'; $('summary').textContent='';
+        checksMap = {};
+        localStorage.removeItem(kRaw(selectedISO));
+        localStorage.removeItem(kChecks(selectedISO));
+        $('raw').focus();
+      });
+      $('saveBtn').addEventListener('click', ()=>{ saveRawText(selectedISO, $('raw').value); alert('Saved.'); });
+      $('loadYBtn').addEventListener('click', ()=>{
+        const yISO = addDays(selectedISO, -1);
+        const yRaw = loadRawText(yISO);
+        if(!yRaw){ alert('No plan saved for yesterday.'); return; }
+        $('raw').value = yRaw;
+        render(yRaw.split(/\n+/));
+      });
 
-    // New: explicit Save
-    document.getElementById('saveBtn').addEventListener('click', ()=>{
-      saveRawText(selectedISO, document.getElementById('raw').value);
-      alert('Saved.');
-    });
+      // Date picker + Today
+      const dp = $('datePicker');
+      function setDate(iso){
+        selectedISO = iso;
+        dp.value = iso;
+        checksMap = loadChecksMap(selectedISO);
+        const raw = loadRawText(selectedISO);
+        $('raw').value = raw;
+        if(raw) render(raw.split(/\n+/));
+        else { $('timeline').innerHTML='<div class="empty">No saved plan for this date. Paste blocks and Render.'; $('summary').textContent=''; }
+      }
+      dp.addEventListener('change', ()=>{ if(dp.value) setDate(dp.value); });
+      $('todayBtn').addEventListener('click', ()=> setDate(todayKey()));
 
-    // New: Load Yesterday into current date (does not auto-save)
-    document.getElementById('loadYBtn').addEventListener('click', ()=>{
-      const yISO = addDays(selectedISO, -1);
-      const yRaw = loadRawText(yISO);
-      if(!yRaw){ alert('No plan saved for yesterday.'); return; }
-      document.getElementById('raw').value = yRaw;
-      render(yRaw.split(/\n+/));
-    });
-
-    // Date picker + Today button
-    const dp = document.getElementById('datePicker');
-    function setDate(iso){
-      selectedISO = iso;
-      dp.value = iso;
-      checksMap = loadChecksMap(selectedISO);
-      const raw = loadRawText(selectedISO);
-      document.getElementById('raw').value = raw;
-      if(raw) render(raw.split(/\n+/));
-      else { document.getElementById('timeline').innerHTML='<div class="empty">No saved plan for this date. Paste blocks and Render.'; document.getElementById('summary').textContent=''; }
-    }
-    dp.addEventListener('change', ()=>{ if(dp.value) setDate(dp.value); });
-    document.getElementById('todayBtn').addEventListener('click', ()=> setDate(todayKey()));
-
-    // Restore on load (today)
-    (function init(){
+      // Init today
       setDate(todayKey());
-    })();
 
-    // SW registration
-    if('serviceWorker' in navigator){
-      window.addEventListener('load', ()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
-    }
+      // Copy/PDF
+      $('copyBtn').addEventListener('click', async ()=>{
+        try{ await navigator.clipboard.writeText($('timeline').innerText||''); alert('Copied to clipboard.'); }
+        catch{ alert('Copy failed.'); }
+      });
+      $('pdfBtn').addEventListener('click', ()=>window.print());
+
+      // SW
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+      }
+    });
+  })();
   </script>
 </body>
 </html>
