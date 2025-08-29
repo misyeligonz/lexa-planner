@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0f3d6e">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icon-192.png" sizes="192x192">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
   <title>Lexa Planner — Deep Blue · Soft Gray</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root{
       --deep-blue:#0f3d6e; --deep-blue-600:#134a88; --soft-gray:#f4f6f8;
@@ -17,14 +19,14 @@
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans";
       color:var(--ink);background:linear-gradient(180deg,var(--soft-gray),#fff 60%)}
-    .app{max-width:960px;margin:0 auto;padding:24px}
-    header{display:flex;align-items:center;gap:14px;margin-bottom:18px;padding:16px 0 8px}
+    .app{max-width:960px;margin:0 auto;padding:24px; padding-bottom:120px;}
+    header{display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:12px 0 4px}
     .logo{width:40px;height:40px;border-radius:12px;background:radial-gradient(100% 100% at 30% 20%, #7fc1ff 0, #4f9fe0 40%, var(--deep-blue) 100%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.25)}
     h1{font-size:20px;margin:0;letter-spacing:.3px}
     .subtitle{color:var(--muted);font-size:13px}
     .panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
     .grid{display:grid;grid-template-columns:1fr;gap:16px}
-    .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px}
+    .toolbar-top{display:flex;justify-content:space-between;align-items:center;padding:10px 12px}
     .btn{appearance:none;border:none;border-radius:14px;padding:10px 14px;font-weight:600;letter-spacing:.2px;cursor:pointer;background:var(--deep-blue);color:#fff;box-shadow:0 2px 0 rgba(0,0,0,.06)}
     .btn.secondary{background:#eef3f8;color:var(--deep-blue);border:1px solid var(--border)}
     .btn.ghost{background:transparent;color:var(--deep-blue);border:1px dashed var(--border)}
@@ -35,26 +37,26 @@
     .timeline{position:relative;padding:18px 10px}
     .timeline:before{content:"";position:absolute;left:44px;top:0;bottom:0;width:2px;background:linear-gradient(var(--border),#cfd6df)}
     .card{position:relative;display:grid;grid-template-columns:110px 1fr;gap:12px;padding:12px;margin:8px 0 14px;background:var(--card);border:1px solid var(--border);border-left:6px solid var(--deep-blue);border-radius:14px;box-shadow:var(--shadow)}
-    .card.done{opacity:.6}.card .title.done{text-decoration:line-through}
-    .time {
-  font-weight: 700;
-  color: var(--deep-blue-600);
-  font-family: 'JetBrains Mono', 'Roboto Mono', 'Courier New', monospace;
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1, "zero" 1; /* even width + slashed zero */
-  letter-spacing: 0.2px;
-}
+    .card.done{opacity:.6} .card .title.done{text-decoration:line-through}
+    .time{font-weight:700;color:var(--deep-blue-600);font-family:'JetBrains Mono','Roboto Mono','Courier New',monospace;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"zero" 1;letter-spacing:.2px}
     .title{font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
     .meta{color:var(--muted);font-size:13px;margin-top:4px}
     .dot{position:absolute;left:41px;top:18px;width:12px;height:12px;background:#fff;border:2px solid var(--deep-blue);border-radius:50%}
     .actions{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
     .action{font-size:12px;padding:6px 10px;border-radius:10px;border:1px solid var(--border);background:#f8fbff;color:#0f3d6e;cursor:pointer}
     .action:active{transform:translateY(1px)}
-    @media print{.toolbar,.input-area,textarea,.actions{display:none!important}body{background:#fff}.app{max-width:800px}.panel{box-shadow:none}}
+    .subtasks{margin:8px 0 0;padding:0;list-style:none}
+    .subtasks li{display:flex;align-items:flex-start;gap:8px;margin:4px 0}
+    .subtasks input[type="checkbox"]{margin-top:2px}
+    .subtasks .st-done{text-decoration:line-through;color:var(--muted)}
+
+    /* Bottom toolbar */
+    .toolbar-bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--border);box-shadow:0 -6px 24px rgba(15,61,110,.05);padding:8px 12px}
+    .toolbar-bottom .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}
+    .toolbar-bottom .row2{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}
+    .date-input{border:1px solid var(--border);border-radius:12px;padding:8px 10px;background:#fbfcfe}
+    @media print{.toolbar-top,.toolbar-bottom,.input-area,textarea,.actions{display:none!important}body{background:#fff}.app{max-width:800px}.panel{box-shadow:none}}
   </style>
-<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="app">
@@ -62,35 +64,18 @@
       <div class="logo" aria-hidden="true"></div>
       <div>
         <h1>Lexa Planner</h1>
-        <div class="subtitle">Deep Blue · Soft Gray — MVP with Actions & Export</div>
+        <div class="subtitle">Deep Blue · Soft Gray — v3.1 · Friday, August 29, 2025</div>
       </div>
     </header>
 
     <div class="grid">
+      <!-- TOP panel with Copy/PDF -->
       <section class="panel">
-        <div class="toolbar">
-          <button class="btn" id="renderBtn">Render planner</button>
-          <button class="btn secondary" id="sampleBtn" title="Insert sample data">Sample</button>
-          <button class="btn ghost" id="clearBtn">Clear</button>
-        </div>
-        <div class="input-area">
-          <textarea id="raw" placeholder="Paste time blocks, one per line. Examples:
-08:30-09:15 Client conf. [Litigation] @RTC Branch 53 #prep
-9:30–10:00 Team standup [Personal]
-10:15 to 11:45 Draft MR on RA 8974 [Litigation] #urgent
-12:00-13:00 Lunch w/ Alan [Personal] @Ayala Mall
-14:00—14:40 Review invoices [Billing]
-15:00-16:00 Estate mtg re TCTs [Estate]"></textarea>
-          <div class="subtitle" style="padding:8px 12px 14px">Tip: You can mix 12-hour or 24-hour times, and use -, –, —, or “to”.</div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="toolbar" style="justify-content:space-between">
+        <div class="toolbar-top">
           <div style="font-weight:700; color:var(--deep-blue-600)">Today</div>
           <div style="display:flex; gap:8px; align-items:center">
             <button class="btn secondary" id="copyBtn" title="Copy timeline text">Copy</button>
-            <button class="btn secondary" id="pdfBtn" title="Export to PDF (Print)">Export PDF</button>
+            <button class="btn secondary" id="pdfBtn" title="Export to PDF (Print)">PDF</button>
             <div id="summary" class="meta"></div>
           </div>
         </div>
@@ -98,52 +83,60 @@
           <div class="empty">Your planner will appear here.</div>
         </div>
       </section>
+
+      <!-- INPUT panel -->
+      <section class="panel">
+        <div class="input-area">
+          <textarea id="raw" placeholder="Paste time blocks, one per line.
+Use semicolons “;” for subtasks, e.g.
+09:30–10:15 Warm-up Admin — 1 invoice; demand letter; skim inbox
+Optional: [Category], @location at end, #tags anywhere."></textarea>
+          <div class="subtitle" style="padding:8px 12px 14px">Tip: You can mix 12‑hour or 24‑hour times, and use -, –, —, or “to”.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Bottom toolbar (fixed) -->
+  <div class="toolbar-bottom">
+    <div class="row">
+      <button class="btn" id="renderBtn">Render</button>
+      <button class="btn secondary" id="sampleBtn">Sample</button>
+      <button class="btn ghost" id="clearBtn">Clear</button>
+      <button class="btn secondary" id="saveBtn">Save</button>
+      <button class="btn secondary" id="loadYBtn">Load Yesterday</button>
+    </div>
+    <div class="row2">
+      <input type="date" id="datePicker" class="date-input">
+      <button class="btn secondary" id="todayBtn">Today</button>
     </div>
   </div>
 
   <script>
     const $ = (id)=>document.getElementById(id);
 
-    // --- Super-forgiving parser ---
-    function parseLine(line){
-      if(!line) return null;
+    // === Date helpers & keys ===
+    const STORAGE_PREFIX = 'lexa:plan:';
+    function toISODate(d){const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${dd}`; }
+    function todayKey(){ return toISODate(new Date()); }
+    function addDays(iso, delta){ const d=new Date(iso); d.setDate(d.getDate()+delta); return toISODate(d); }
 
-      // Normalize NBSP to space and trim
-      let s = line.replace(/\u00A0/g, ' ').trim();
+    function kRaw(iso){   return `${STORAGE_PREFIX}${iso}:raw`; }
+    function kChecks(iso){return `${STORAGE_PREFIX}${iso}:checks`; }
 
-      // Normalize dashes and "to"
-      s = s
-        .replace(/[—–−]/g, '-')        // em/en/minus → hyphen
-        .replace(/\s+to\s+/i, '-')     // " to " → "-"
-        .replace(/\s*-\s*-\s*/g, '-')  // "--" → "-"
-        .replace(/^\s+|\s+$/g, '');
+    function saveRawText(iso, t){ localStorage.setItem(kRaw(iso), t); }
+    function loadRawText(iso){  return localStorage.getItem(kRaw(iso)) || ''; }
 
-      // Allow optional decorative dash right after the range
-      s = s.replace(/^(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*-\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*[—-]?\s+/i, '$1-$2 ');
+    function saveChecksMap(iso, map){ localStorage.setItem(kChecks(iso), JSON.stringify(map)); }
+    function loadChecksMap(iso){ try { return JSON.parse(localStorage.getItem(kChecks(iso))||'{}'); } catch { return {}; } }
 
-      // FINAL match: START - END  <space>  Title...
-      const re = /^\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*-\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s+(.+?)\s*$/i;
-      const m = s.match(re);
-      if(!m) return null;
+    // App state
+    let items = [];
+    let originalLines = [];
+    let selectedISO = todayKey();
+    let checksMap = loadChecksMap(selectedISO);
 
-      const [,h1,mi1,ap1,h2,mi2,ap2,rest] = m;
-      const start = toMin(h1,mi1,ap1);
-      const end   = toMin(h2,mi2,ap2);
-
-      let title = rest.trim();
-      let category=null, tags=[], location=null;
-
-      const cat = title.match(/\[(.+?)\]/);
-      if(cat){ category=cat[1].trim(); title=title.replace(cat[0],'').trim(); }
-
-      title = title.replace(/#(\S+)/g, (_,$1)=>{ tags.push($1); return ''; }).trim();
-
-      const loc = title.match(/@(\S[\w\s\-.,/()]*)$/);
-      if(loc){ location = loc[1].trim(); title = title.replace(loc[0],'').trim(); }
-
-      return {start,end,title,category,tags,location};
-    }
-
+    // Time helpers
     function toMin(h, m, ap){
       let hh = parseInt(h||'0',10), mm = parseInt(m||'0',10);
       const p = (ap||'').toLowerCase();
@@ -152,100 +145,264 @@
       return hh*60+mm;
     }
     function fmt(min){
-      const h = Math.floor(min/60), m = min%60, ap = h>=12?'PM':'AM', hr = (h%12)||12;
-      return `${hr}:${m.toString().padStart(2,'0')} ${ap}`;
+      const h = Math.floor(min/60), m = min % 60;
+      const ap = h >= 12 ? 'PM' : 'AM';
+      const hr24 = h % 24;
+      const hr12 = (hr24 % 12) || 12;
+      const hr = String(hr12).padStart(2,'0');
+      return `${hr}:${String(m).padStart(2,'0')} ${ap}`;
+    }
+    function padTime24(min){
+      const h = Math.floor(min/60), m = min % 60;
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    }
+    function serializeItem(it){
+      const left = `${padTime24(it.start)}-${padTime24(it.end)}`;
+      const parts = [it.title];
+      if(it.category) parts.push(`[${it.category}]`);
+      if(it.location) parts.push(`@${it.location}`);
+      if(it.tags && it.tags.length) parts.push(it.tags.map(t=>`#${t}`).join(' '));
+      return `${left} ${parts.filter(Boolean).join(' ')}`.trim();
     }
 
+    // Parser (forgiving + subtasks)
+    function parseLine(line){
+      if(!line) return null;
+      let s = line.replace(/\u00A0/g, ' ').trim();
+      s = s.replace(/[—–−]/g, '-').replace(/\s+to\s+/i, '-').replace(/\s*-\s*-\s*/g, '-').replace(/^\s+|\s+$/g, '');
+      s = s.replace(/^(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*-\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*[-]?\s+/i, '$1-$2 ');
+      const re = /^\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*-\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s+(.+?)\s*$/i;
+      const m = s.match(re);
+      if(!m) return null;
+      const [,h1,mi1,ap1,h2,mi2,ap2,rest] = m;
+      const start = toMin(h1, mi1, ap1||'');
+      const end   = toMin(h2, mi2, ap2||'');
+
+      let title = rest.trim();
+      let category=null, tags=[], location=null;
+      const cat = title.match(/\[(.+?)\]/);
+      if(cat){ category=cat[1].trim(); title=title.replace(cat[0],'').trim(); }
+      title = title.replace(/#(\S+)/g, (_,$1)=>{ tags.push($1); return ''; }).trim();
+      const loc = title.match(/@(\S[\w\s\-.,/()]*)$/);
+      if(loc){ location = loc[1].trim(); title = title.replace(loc[0],'').trim(); }
+
+      let mainTitle = title, subtasks = [];
+      const dashSplit = title.split(/\s-\s/);
+      if (dashSplit.length > 1 && dashSplit.slice(1).join(' - ').includes(';')) {
+        mainTitle = dashSplit[0].trim();
+        const after = dashSplit.slice(1).join(' - ').trim();
+        subtasks = after.split(';').map(t=>t.trim()).filter(Boolean);
+      } else if (title.includes(';')) {
+        const parts = title.split(';').map(t=>t.trim()).filter(Boolean);
+        mainTitle = parts.shift() || title;
+        subtasks = parts;
+      }
+
+      return { start, end, title: mainTitle, subtasks, category, tags, location };
+    }
+
+    function escapeHtml(str){ return str.replace(/[&<>"']/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\":"&quot;","'":"&#39;"}[s])); }
+
     function render(lines){
-      const items=[];
-      lines.forEach(raw=>{
-        const t = raw.trim();
-        if(!t) return;
+      originalLines = lines.slice();
+      items = [];
+      lines.forEach((raw, i)=>{
+        const t = (raw||'').trim(); if(!t) return;
         const it = parseLine(t);
-        if(it) items.push(it);
+        if(it){ it.lineIndex = i; items.push(it); }
       });
+
       items.sort((a,b)=>a.start-b.start);
-      const host = $('timeline');
-      host.innerHTML='';
+
+      const host = document.getElementById('timeline'); host.innerHTML='';
       if(!items.length){
-        host.innerHTML = '<div class="empty">Nothing to show. Paste time blocks on the left and tap <b>Render planner</b>.</div>';
-        $('summary').textContent='';
-        return;
+        host.innerHTML='<div class="empty">Nothing to show. Paste time blocks on the left and tap <b>Render</b>.</div>';
+        document.getElementById('summary').textContent=''; return;
       }
       const total=items.reduce((s,i)=>s+(i.end-i.start),0);
-      $('summary').textContent = `${items.length} block${items.length>1?'s':''} · ${Math.floor(total/60)}h ${total%60}m`;
+      document.getElementById('summary').textContent = `${items.length} block${items.length>1?'s':''} · ${Math.floor(total/60)}h ${total%60}m`;
 
+      const stored = loadChecksMap(selectedISO);
       items.forEach((it, idx)=>{
-        const card = document.createElement('div');
-        card.className='card';
-        card.dataset.index=idx;
+        const card = document.createElement('div'); card.className='card'; card.dataset.index=idx;
+        const meta = [it.category?`[${escapeHtml(it.category)}]`:null, it.location?`@ ${escapeHtml(it.location)}`:null, it.tags.length?`#${it.tags.join(' #')}`:null].filter(Boolean).join(' · ');
+
+        const lineStore = stored[it.lineIndex] || {}; const subChecks = lineStore.sub || {};
+        let subtasksHtml='';
+        if(it.subtasks && it.subtasks.length){
+          const list = it.subtasks.map((st, si)=>{
+            const checked=!!subChecks[si];
+            return `<li>
+                      <input type="checkbox" class="subtask" data-si="${si}" ${checked?'checked':''}>
+                      <span class="st-label ${checked?'st-done':''}">${escapeHtml(st)}</span>
+                    </li>`;
+          }).join('');
+          subtasksHtml = `<ul class="subtasks">${list}</ul>`;
+        }
+
         card.innerHTML = `
           <span class="dot" aria-hidden="true"></span>
           <div class="time">${fmt(it.start)}–${fmt(it.end)}</div>
           <div>
             <div class="title">${escapeHtml(it.title)}</div>
-            <div class="meta">${[it.category?`[${escapeHtml(it.category)}]`:null, it.location?`@ ${escapeHtml(it.location)}`:null, it.tags.length?`#${it.tags.join(' #')}`:null].filter(Boolean).join(' · ')}</div>
+            <div class="meta">${meta}</div>
+            ${subtasksHtml}
             <div class="actions">
               <button class="action" data-act="done">✅ Done</button>
               <button class="action" data-act="move">⏭ Move</button>
               <button class="action" data-act="remind">⏰ Remind</button>
             </div>
           </div>`;
+
+        if(it.subtasks && it.subtasks.length){
+          const all = it.subtasks.every((_,si)=>!!subChecks[si]);
+          if(all){ card.classList.add('done'); card.querySelector('.title').classList.add('done'); }
+        } else if(lineStore.done){ card.classList.add('done'); card.querySelector('.title').classList.add('done'); }
         host.appendChild(card);
       });
     }
 
-    function escapeHtml(str){
-      return str.replace(/[&<>\"']/g, s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[s]));
-    }
+    // Subtask changes
+    document.addEventListener('change', (e)=>{
+      const box = e.target.closest('input.subtask'); if(!box) return;
+      const card = box.closest('.card'); const idx = +card.dataset.index; const it = items[idx];
+      const label = box.nextElementSibling; if(label) label.classList.toggle('st-done', box.checked);
+
+      const si = +box.dataset.si;
+      checksMap[it.lineIndex] = checksMap[it.lineIndex] || { sub: {} };
+      checksMap[it.lineIndex].sub = checksMap[it.lineIndex].sub || {};
+      checksMap[it.lineIndex].sub[si] = box.checked;
+
+      const boxes = card.querySelectorAll('input.subtask'); const all = [...boxes].every(b=>b.checked);
+      card.classList.toggle('done', all);
+      card.querySelector('.title').classList.toggle('done', all);
+      if(!boxes.length){ checksMap[it.lineIndex].done = all; }
+      saveChecksMap(selectedISO, checksMap);
+    });
 
     // Actions
-    document.addEventListener('click', (e)=>{
+    document.addEventListener('click', async (e)=>{
       const btn = e.target.closest('.action'); if(!btn) return;
-      const card = btn.closest('.card'); const idx = +card.dataset.index;
+      const card = btn.closest('.card'); const idx = +card.dataset.index; const it = items[idx];
       const act = btn.dataset.act;
-      if(act==='done'){ card.classList.toggle('done'); card.querySelector('.title').classList.toggle('done'); }
+      if(act==='done'){
+        const boxes = card.querySelectorAll('input.subtask');
+        if(boxes.length){
+          const anyUnchecked = [...boxes].some(b=>!b.checked);
+          boxes.forEach((b,si)=>{
+            b.checked = anyUnchecked;
+            const lbl = b.nextElementSibling; if(lbl) lbl.classList.toggle('st-done', anyUnchecked);
+            checksMap[it.lineIndex] = checksMap[it.lineIndex] || { sub: {} };
+            checksMap[it.lineIndex].sub = checksMap[it.lineIndex].sub || {};
+            checksMap[it.lineIndex].sub[si] = anyUnchecked;
+          });
+          card.classList.toggle('done', anyUnchecked);
+          card.querySelector('.title').classList.toggle('done', anyUnchecked);
+        } else {
+          const willBe = !card.classList.contains('done');
+          card.classList.toggle('done', willBe);
+          card.querySelector('.title').classList.toggle('done', willBe);
+          checksMap[it.lineIndex] = checksMap[it.lineIndex] || {};
+          checksMap[it.lineIndex].done = willBe;
+        }
+        saveChecksMap(selectedISO, checksMap);
+      }
       if(act==='move'){
-        const input = prompt("New time range (e.g., 2:30-3:15 PM or 14:30-15:15):","");
+        const input = prompt("New time range (e.g., 6:30-7:00 PM or 18:30-19:00):","");
         if(!input) return;
         const m = input.replace(/[—–]/g,'-').match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*[^0-9]+\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i);
-        if(!m) return alert("Couldn’t read that time.");
-        const s=toMin(...(m[1].match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i)||[]).slice(1));
-        const e=toMin(...(m[2].match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i)||[]).slice(1));
-        if(isNaN(s)||isNaN(e)) return alert("Invalid time.");
-        // Re-render from textarea to keep order
-        render($('raw').value.split(/\n+/));
+        if(!m) return alert("Try formats like '6:30-7:00 PM' or '18:30-19:00'.");
+        const parseAny = (s)=>{ const p=s.trim().match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i); if(!p) return null; return toMin(p[1], p[2]||'00', p[3]||''); };
+        const sMin = parseAny(m[1]), eMin = parseAny(m[2]);
+        if(sMin==null || eMin==null) return alert("Invalid time.");
+        it.start = sMin; it.end = eMin;
+        const lineIdx = it.lineIndex;
+        if(lineIdx!=null && lineIdx>=0){
+          originalLines[lineIdx] = serializeItem(it);
+          document.getElementById('raw').value = originalLines.join('\n');
+          saveRawText(selectedISO, document.getElementById('raw').value);
+        }
+        render(originalLines);
+        return;
       }
       if(act==='remind'){
-        const offset = parseInt(prompt("Remind how many minutes before start?","10")||"0",10);
-        const now=new Date(), startMin = 9; // placeholder (client-side reminders are best-effort)
-        alert("Reminder set (best effort via browser notifications).");
+        const offsetStr = prompt("Remind how many minutes before start?","10");
+        const offsetMin = Math.max(0, parseInt(offsetStr||"0",10));
+        if(!('Notification' in window)) return alert('Notifications not supported.');
+        const perm = await Notification.requestPermission();
+        if(perm!=='granted') return alert('Notification permission was denied.');
+        const now=new Date();
+        const when = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Math.floor(it.start/60), it.start%60).getTime() - offsetMin*60000;
+        const delay = Math.max(0, when - Date.now());
+        setTimeout(()=> new Notification('Lexa Reminder', { body: `${fmt(it.start)} — ${it.title}` }), delay);
+        alert('Reminder set.');
       }
     });
 
     // Buttons
-    $('renderBtn').addEventListener('click', ()=>{
-      render($('raw').value.split(/\n+/));
-      $('timeline').scrollIntoView({behavior:'smooth',block:'start'});
+    document.getElementById('renderBtn').addEventListener('click', ()=>{
+      const raw = document.getElementById('raw').value;
+      saveRawText(selectedISO, raw);
+      render(raw.split(/\n+/));
+      document.getElementById('timeline').scrollIntoView({behavior:'smooth',block:'start'});
     });
-    $('clearBtn').addEventListener('click', ()=>{
-      $('raw').value=''; $('timeline').innerHTML='<div class="empty">Your planner will appear here.</div>'; $('summary').textContent='';
-      $('raw').focus();
-    });
-    const SAMPLE = `08:30-09:15 Client conf. [Litigation] @RTC Branch 53 #prep
+    document.getElementById('sampleBtn').addEventListener('click', ()=>{
+      const SAMPLE = `08:30-09:15 Client conf. [Litigation] @RTC Branch 53 #prep
 9:30–10:00 Team standup [Personal]
 10:15 to 11:45 Draft MR citing RA 8974 [Litigation] #urgent
 12:00-13:00 Lunch w/ Alan [Personal] @Ayala Mall
 14:00—14:40 Review invoices [Billing]
 15:00-16:00 Estate mtg re TCTs [Estate] @GRDC`;
-    $('sampleBtn').addEventListener('click', ()=>{ $('raw').value=SAMPLE; });
-
-    // Export
-    $('copyBtn').addEventListener('click', async ()=>{
-      const itemsText = $('timeline').innerText || '';
-      try{ await navigator.clipboard.writeText(itemsText); alert('Copied to clipboard.'); }catch{ alert('Copy failed.'); }
+      document.getElementById('raw').value = SAMPLE;
     });
-    $('pdfBtn').addEventListener('click', ()=>window.print());
+    document.getElementById('clearBtn').addEventListener('click', ()=>{
+      document.getElementById('raw').value='';
+      document.getElementById('timeline').innerHTML='<div class="empty">Your planner will appear here.</div>';
+      document.getElementById('summary').textContent='';
+      checksMap = {};
+      localStorage.removeItem(kRaw(selectedISO));
+      localStorage.removeItem(kChecks(selectedISO));
+      document.getElementById('raw').focus();
+    });
+    document.getElementById('copyBtn').addEventListener('click', async ()=>{
+      const text = document.getElementById('timeline').innerText || '';
+      try{ await navigator.clipboard.writeText(text); alert('Copied to clipboard.'); }catch{ alert('Copy failed.'); }
+    });
+    document.getElementById('pdfBtn').addEventListener('click', ()=>window.print());
+
+    // New: explicit Save
+    document.getElementById('saveBtn').addEventListener('click', ()=>{
+      saveRawText(selectedISO, document.getElementById('raw').value);
+      alert('Saved.');
+    });
+
+    // New: Load Yesterday into current date (does not auto-save)
+    document.getElementById('loadYBtn').addEventListener('click', ()=>{
+      const yISO = addDays(selectedISO, -1);
+      const yRaw = loadRawText(yISO);
+      if(!yRaw){ alert('No plan saved for yesterday.'); return; }
+      document.getElementById('raw').value = yRaw;
+      render(yRaw.split(/\n+/));
+    });
+
+    // Date picker + Today button
+    const dp = document.getElementById('datePicker');
+    function setDate(iso){
+      selectedISO = iso;
+      dp.value = iso;
+      checksMap = loadChecksMap(selectedISO);
+      const raw = loadRawText(selectedISO);
+      document.getElementById('raw').value = raw;
+      if(raw) render(raw.split(/\n+/));
+      else { document.getElementById('timeline').innerHTML='<div class="empty">No saved plan for this date. Paste blocks and Render.'; document.getElementById('summary').textContent=''; }
+    }
+    dp.addEventListener('change', ()=>{ if(dp.value) setDate(dp.value); });
+    document.getElementById('todayBtn').addEventListener('click', ()=> setDate(todayKey()));
+
+    // Restore on load (today)
+    (function init(){
+      setDate(todayKey());
+    })();
 
     // SW registration
     if('serviceWorker' in navigator){
