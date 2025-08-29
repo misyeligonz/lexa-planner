@@ -1,5 +1,5 @@
-// Lexa Planner SW — offline + installable (v4.1)
-const CACHE = 'lexa-v4.1';
+// Lexa Planner SW — offline + installable (v4.1.2)
+const CACHE = 'lexa-v4.1.2';
 const ASSETS = [
   './',
   './index.html',
