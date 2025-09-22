@@ -50,6 +50,12 @@
     .subtasks input[type="checkbox"]{margin-top:2px}
     .subtasks .st-done{text-decoration:line-through;color:var(--muted)}
 
+    <div class="auth-toolbar" style="margin-top:10px;">
+  <button id="loginBtn">🔑 Login with Google</button>
+  <button id="logoutBtn" style="display:none;">🚪 Logout</button>
+  <span id="userInfo" style="margin-left:10px; font-size:14px; color:#555;"></span>
+</div>
+
     /* Bottom toolbar */
     .toolbar-bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--border);box-shadow:0 -6px 24px rgba(15,61,110,.05);padding:8px 12px}
     .toolbar-bottom .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}
@@ -396,5 +402,33 @@ Optional: [Category], @location at end, #tags anywhere."></textarea>
     });
   })();
   </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBdY-mupSm-ENMRhb08QV34-QeX083aZZU",
+    authDomain: "lexa-planner.firebaseapp.com",
+    projectId: "lexa-planner",
+    storageBucket: "lexa-planner.firebasestorage.app",
+    messagingSenderId: "328611098033",
+    appId: "1:328611098033:web:921ab27df5b3f9c9a28a30"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Expose Firebase to other scripts
+  window.lexaFirebase = {
+    app, auth, db,
+    GoogleAuthProvider, signInWithPopup,
+    onAuthStateChanged, signOut,
+    doc, setDoc, getDoc
+  };
+</script>
 </body>
 </html>
+Add Firebase init
