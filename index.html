@@ -199,14 +199,13 @@ Optional: [Category], @location at end, #tags anywhere."></textarea>
     import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "lexa-planner.firebaseapp.com",
-      projectId: "lexa-planner",
-      storageBucket: "lexa-planner.appspot.com",
-      messagingSenderId: "328611098033",
-      appId: "YOUR_APP_ID"
-    };
-
+  apiKey: "AIzaSyBdY-mupSm-ENMRbh080V34-QeX083a2ZU",
+  authDomain: "lexa-planner.firebaseapp.com",
+  projectId: "lexa-planner",
+  storageBucket: "lexa-planner.firebasestorage.app",
+  messagingSenderId: "328611090833",
+  appId: "1:328611090833:web:921ab27df5b3f9c9a28a30"
+};
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
