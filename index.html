@@ -3,174 +3,324 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0f3d6e">
+  <meta name="theme-color" content="#1f2937">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
-  <title>Lexa Planner — Deep Blue · Soft Gray</title>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>Lexa Book Studio</title>
   <style>
-    :root{
-      --deep-blue:#0f3d6e; --deep-blue-600:#134a88; --soft-gray:#f4f6f8;
-      --ink:#1d2430; --muted:#6b7280; --card:#ffffff; --border:#d5dbe3;
-      --danger:#d9685b; --radius:18px;
-      --shadow:0 8px 24px rgba(15,61,110,.08), 0 2px 6px rgba(15,61,110,.05);
+    :root {
+      --bg: #f3f5f8;
+      --panel: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --brand: #1f4f8f;
     }
-    *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans";
-      color:var(--ink);background:linear-gradient(180deg,var(--soft-gray),#fff 60%)}
-    .app{max-width:960px;margin:0 auto;padding:24px; padding-bottom:120px;}
-    header{display:flex;align-items:center;gap:14px;margin-bottom:12px;padding:12px 0 4px}
-    .logo{width:40px;height:40px;border-radius:12px;background:radial-gradient(100% 100% at 30% 20%, #7fc1ff 0, #4f9fe0 40%, var(--deep-blue) 100%);box-shadow:inset 0 0 0 2px rgba(255,255,255,.25)}
-    h1{font-size:20px;margin:0;letter-spacing:.3px}
-    .subtitle{color:var(--muted);font-size:13px}
-    .panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
-    .grid{display:grid;grid-template-columns:1fr;gap:16px;padding:0 8px;}
-    .toolbar-top{display:flex;justify-content:space-between;align-items:center;padding:10px 12px}
-    .btn{appearance:none;border:none;border-radius:14px;padding:10px 14px;font-weight:600;letter-spacing:.2px;cursor:pointer;background:var(--deep-blue);color:#fff;box-shadow:0 2px 0 rgba(0,0,0,.06)}
-    .btn.secondary{background:#eef3f8;color:var(--deep-blue);border:1px solid var(--border)}
-    .btn.ghost{background:transparent;color:var(--deep-blue);border:1px dashed var(--border)}
-    .btn:active{transform:translateY(1px)}
-    .input-area{padding:12px}
-    textarea{width:100%;min-height:160px;resize:vertical;border-radius:14px;border:1px solid var(--border);padding:14px;background:#fbfcfe;outline:none;box-shadow:inset 0 1px 0 #fff;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-    textarea::placeholder{color:#9aa6b2}
-    .timeline{position:relative;padding:18px 10px}
-    .timeline:before{content:"";position:absolute;left:44px;top:0;bottom:0;width:2px;background:linear-gradient(var(--border),#cfd6df)}
-    .card{position:relative;display:grid;grid-template-columns:110px 1fr;gap:12px;padding:12px;margin:8px 0 14px;background:var(--card);border:1px solid var(--border);border-left:6px solid var(--deep-blue);border-radius:14px;box-shadow:var(--shadow);max-width:100%;word-wrap:break-word;}
-    .card.done{opacity:.6} .card .title.done{text-decoration:line-through}
-    .time{font-weight:700;color:var(--deep-blue-600);font-family:'JetBrains Mono','Roboto Mono','Courier New',monospace;font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1,"zero" 1;letter-spacing:.2px}
-    .title{font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .meta{color:var(--muted);font-size:13px;margin-top:4px}
-    .dot{position:absolute;left:41px;top:18px;width:12px;height:12px;background:#fff;border:2px solid var(--deep-blue);border-radius:50%}
-    .actions{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
-    .action{font-size:12px;padding:6px 10px;border-radius:10px;border:1px solid var(--border);background:#f8fbff;color:#0f3d6e;cursor:pointer}
-    .action:active{transform:translateY(1px)}
-    .subtasks{margin:8px 0 0;padding:0;list-style:none}
-    .subtasks li{display:flex;align-items:flex-start;gap:8px;margin:4px 0}
-    .subtasks input[type="checkbox"]{margin-top:2px}
-    .subtasks .st-done{text-decoration:line-through;color:var(--muted)}
-
-    /* Bottom toolbar */
-    .toolbar-bottom{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--border);box-shadow:0 -6px 24px rgba(15,61,110,.05);padding:8px 12px}
-    .toolbar-bottom .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}
-    .toolbar-bottom .row2{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}
-    .date-input{border:1px solid var(--border);border-radius:12px;padding:8px 10px;background:#fbfcfe}
-    @media print{.toolbar-top,.toolbar-bottom,.input-area,textarea,.actions{display:none!important}body{background:#fff}.app{max-width:800px}.panel{box-shadow:none}}
-
-    /* Login Toolbar */
-    .auth-toolbar {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: white;
-      padding: 5px 10px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,.1);
-      z-index: 1000;
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #eef2f8 0%, #fafbfc 40%, #fff 100%);
     }
-    .auth-toolbar button {
-      font-size: 13px;
-      padding: 5px 10px;
-      border-radius: 6px;
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.25rem;
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: minmax(300px, 420px) 1fr;
+    }
+    .panel {
+      background: var(--panel);
       border: 1px solid var(--border);
-      background: #f8fbff;
-      color: #0f3d6e;
-      cursor: pointer;
+      border-radius: 16px;
+      padding: 1rem;
+      box-shadow: 0 8px 28px rgba(0,0,0,.06);
     }
-    body { padding-top: 60px; }
+    h1 { margin: 0 0 .2rem; font-size: 1.35rem; }
+    .subtitle { color: var(--muted); font-size: .9rem; margin-bottom: .8rem; }
+    label { display: block; font-size: .85rem; margin: .7rem 0 .2rem; color: #374151; }
+    textarea, select, input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .6rem .7rem;
+      font: inherit;
+      background: #fff;
+    }
+    textarea { min-height: 240px; resize: vertical; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+    .btns { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .9rem; }
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: .6rem .8rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .primary { background: var(--brand); color: #fff; }
+    .secondary { background: #eef2ff; color: #1e3a8a; }
+    .ghost { background: #f8fafc; color: #1f2937; border: 1px solid var(--border); }
+
+    .preview-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+      padding: .5rem;
+      max-height: calc(100vh - 3rem);
+      overflow: auto;
+      background: #e5e7eb;
+      border-radius: 12px;
+    }
+    .page {
+      background: #fff;
+      color: #111;
+      box-shadow: 0 6px 20px rgba(0,0,0,.15);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      overflow: hidden;
+    }
+    .page-content { width: 100%; }
+    .page-number {
+      position: absolute;
+      bottom: .35in;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 10pt;
+      color: #555;
+    }
+    .chapter {
+      font-size: 18pt;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      text-align: center;
+      margin: 1.2em 0 1.8em;
+      page-break-after: avoid;
+    }
+    .status { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+      .preview-wrap { max-height: unset; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .panel:first-child { display: none !important; }
+      .app { display: block; max-width: none; padding: 0; }
+      .panel { border: none; box-shadow: none; padding: 0; }
+      .preview-wrap { background: transparent; gap: 0; padding: 0; overflow: visible; }
+      .page { box-shadow: none; margin: 0; page-break-after: always; }
+      .page:last-child { page-break-after: auto; }
+    }
   </style>
 </head>
 <body>
-  <div class="auth-toolbar">
-    <button id="loginBtn">🔑 Login with Google</button>
-    <button id="logoutBtn" style="display:none;">🚪 Logout</button>
-    <span id="userInfo" style="margin-left:10px; font-size:14px; color:#555;"></span>
-  </div>
+  <main class="app">
+    <section class="panel">
+      <h1>Lexa Book Studio</h1>
+      <div class="subtitle">Paste manuscript text and preview a clean, print-ready book layout.</div>
 
-  <div class="app">
-    <header>
-      <div class="logo" aria-hidden="true"></div>
-      <div>
-        <h1>Lexa Planner</h1>
-        <div class="subtitle">Deep Blue · Soft Gray — v3.2.0</div>
+      <label for="rawText">Manuscript</label>
+      <textarea id="rawText" placeholder="Paste your manuscript here. Use blank lines between paragraphs.\nStart chapters with 'Chapter 1', 'CHAPTER ONE', etc."></textarea>
+
+      <div class="grid-2">
+        <div>
+          <label for="trimSize">Trim size</label>
+          <select id="trimSize">
+            <option value='{"w":6,"h":9}'>6" × 9" (Trade)</option>
+            <option value='{"w":5.5,"h":8.5}'>5.5" × 8.5"</option>
+            <option value='{"w":8.5,"h":11}'>8.5" × 11"</option>
+          </select>
+        </div>
+        <div>
+          <label for="fontFamily">Body font</label>
+          <select id="fontFamily">
+            <option value="Georgia, 'Times New Roman', serif">Serif (Book)</option>
+            <option value="'Palatino Linotype', Palatino, serif">Palatino</option>
+            <option value="Arial, Helvetica, sans-serif">Sans Serif</option>
+          </select>
+        </div>
       </div>
-    </header>
 
-    <div class="grid">
-      <!-- Top panel (Copy/PDF + summary) -->
-      <section class="panel">
-        <div class="toolbar-top">
-          <div style="font-weight:700; color:var(--deep-blue-600)">Today</div>
-          <div style="display:flex; gap:8px; align-items:center">
-            <button class="btn secondary" id="copyBtn">Copy</button>
-            <button class="btn secondary" id="pdfBtn">PDF</button>
-            <div id="summary" class="meta"></div>
-          </div>
+      <div class="grid-2">
+        <div>
+          <label for="fontSize">Font size (pt)</label>
+          <input id="fontSize" type="number" min="9" max="14" step="0.5" value="11" />
         </div>
-        <div id="timeline" class="timeline">
-          <div class="empty">Your planner will appear here.</div>
+        <div>
+          <label for="lineHeight">Line height</label>
+          <input id="lineHeight" type="number" min="1.1" max="2" step="0.05" value="1.4" />
         </div>
-      </section>
+      </div>
 
-      <!-- Input panel -->
-      <section class="panel">
-        <div class="input-area">
-          <textarea id="raw" placeholder="Paste time blocks, one per line.
-Use semicolons “;” for subtasks, e.g.
-09:30–10:15 Warm-up Admin — 1 invoice; demand letter; skim inbox
-Optional: [Category], @location at end, #tags anywhere."></textarea>
-          <div class="subtitle" style="padding:8px 12px 14px">Tip: You can mix 12-hour or 24-hour times, and use -, –, —, or “to”.</div>
+      <div class="grid-2">
+        <div>
+          <label for="indent">First-line indent (in)</label>
+          <input id="indent" type="number" min="0" max="0.6" step="0.05" value="0.25" />
         </div>
-      </section>
-    </div>
-  </div>
+        <div>
+          <label for="margins">Margins (in)</label>
+          <input id="margins" type="number" min="0.5" max="1.5" step="0.05" value="0.75" />
+        </div>
+      </div>
 
-  <!-- Bottom toolbar -->
-  <div class="toolbar-bottom">
-    <div class="row">
-      <button class="btn" id="renderBtn">Render</button>
-      <button class="btn secondary" id="sampleBtn">Sample</button>
-      <button class="btn ghost" id="clearBtn">Clear</button>
-      <button class="btn secondary" id="saveBtn">Save</button>
-      <button class="btn secondary" id="saveCloudBtn">Save (Cloud)</button>
-      <button class="btn secondary" id="loadYBtn">Load Yesterday</button>
-    </div>
-    <div class="row2">
-      <input type="date" id="datePicker" class="date-input">
-      <button class="btn secondary" id="todayBtn">Today</button>
-    </div>
-  </div>
+      <div class="btns">
+        <button class="primary" id="buildBtn">Build Book</button>
+        <button class="secondary" id="sampleBtn">Load Sample</button>
+        <button class="ghost" id="printBtn">Print / Save PDF</button>
+      </div>
+      <div class="status" id="status">No pages rendered yet.</div>
+    </section>
 
-  <!-- Scripts (your existing logic remains unchanged, only fix was removing "Block " in render loop) -->
+    <section class="panel">
+      <div id="preview" class="preview-wrap" aria-live="polite"></div>
+    </section>
+  </main>
+
   <script>
-  // Keep your render() and logic as before, just ensure inside render():
-  // Replace <div class="title">Block ${escapeHtml(it.title)}</div>
-  // with <div class="title">${escapeHtml(it.title)}</div>
-  </script>
+    const byId = (id) => document.getElementById(id);
 
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    const rawText = byId('rawText');
+    const trimSize = byId('trimSize');
+    const fontFamily = byId('fontFamily');
+    const fontSize = byId('fontSize');
+    const lineHeight = byId('lineHeight');
+    const indent = byId('indent');
+    const margins = byId('margins');
+    const preview = byId('preview');
+    const status = byId('status');
 
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "lexa-planner.firebaseapp.com",
-      projectId: "lexa-planner",
-      storageBucket: "lexa-planner.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
+    function isChapter(line) {
+      return /^(chapter\s+\w+|ch\.\s*\w+|part\s+\w+)/i.test(line.trim());
+    }
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    function manuscriptBlocks(text) {
+      return text
+        .split(/\n{2,}/)
+        .map((p) => p.replace(/\n+/g, ' ').trim())
+        .filter(Boolean)
+        .map((t) => ({ type: isChapter(t) ? 'chapter' : 'p', text: t }));
+    }
 
-    window.lexaFirebase = { app, auth, db, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, doc, setDoc, getDoc };
+    function applyPageStyle(page, options) {
+      page.style.width = `${options.w}in`;
+      page.style.height = `${options.h}in`;
+      page.style.padding = `${options.margin}in`;
+      page.style.fontFamily = options.font;
+      page.style.fontSize = `${options.fontSize}pt`;
+      page.style.lineHeight = String(options.lineHeight);
+      page.style.textAlign = 'justify';
+      page.style.hyphens = 'auto';
+    }
+
+    function makeParagraph(text, opts, firstInSection) {
+      const p = document.createElement('p');
+      p.textContent = text;
+      p.style.margin = '0 0 .6em';
+      p.style.textIndent = firstInSection ? '0' : `${opts.indent}in`;
+      p.style.orphans = '2';
+      p.style.widows = '2';
+      return p;
+    }
+
+    function buildBook() {
+      const blocks = manuscriptBlocks(rawText.value);
+      const size = JSON.parse(trimSize.value);
+      const opts = {
+        w: size.w,
+        h: size.h,
+        margin: Number(margins.value) || 0.75,
+        font: fontFamily.value,
+        fontSize: Number(fontSize.value) || 11,
+        lineHeight: Number(lineHeight.value) || 1.4,
+        indent: Number(indent.value) || 0.25
+      };
+
+      preview.innerHTML = '';
+      if (!blocks.length) {
+        status.textContent = 'Paste manuscript text, then click Build Book.';
+        return;
+      }
+
+      const measuringPage = document.createElement('article');
+      measuringPage.className = 'page';
+      applyPageStyle(measuringPage, opts);
+
+      const pageContent = document.createElement('div');
+      pageContent.className = 'page-content';
+      measuringPage.appendChild(pageContent);
+
+      const maxHeightPx = (opts.h - (opts.margin * 2) - 0.45) * 96;
+
+      const pages = [];
+      let currentPage = measuringPage;
+      let currentContent = pageContent;
+      let isFirstAfterChapter = true;
+
+      const flushPage = () => {
+        const page = currentPage.cloneNode(true);
+        pages.push(page);
+        currentPage = document.createElement('article');
+        currentPage.className = 'page';
+        applyPageStyle(currentPage, opts);
+        currentContent = document.createElement('div');
+        currentContent.className = 'page-content';
+        currentPage.appendChild(currentContent);
+        isFirstAfterChapter = true;
+      };
+
+      for (const block of blocks) {
+        if (block.type === 'chapter') {
+          const h2 = document.createElement('h2');
+          h2.className = 'chapter';
+          h2.textContent = block.text;
+          currentContent.appendChild(h2);
+          if (currentContent.scrollHeight > maxHeightPx) {
+            currentContent.removeChild(h2);
+            flushPage();
+            currentContent.appendChild(h2);
+          }
+          isFirstAfterChapter = true;
+          continue;
+        }
+
+        const p = makeParagraph(block.text, opts, isFirstAfterChapter);
+        currentContent.appendChild(p);
+        if (currentContent.scrollHeight > maxHeightPx) {
+          currentContent.removeChild(p);
+          flushPage();
+          const p2 = makeParagraph(block.text, opts, true);
+          currentContent.appendChild(p2);
+        }
+        isFirstAfterChapter = false;
+      }
+
+      if (currentContent.childNodes.length) pages.push(currentPage.cloneNode(true));
+
+      pages.forEach((p, i) => {
+        const n = document.createElement('div');
+        n.className = 'page-number';
+        n.textContent = `${i + 1}`;
+        p.appendChild(n);
+        preview.appendChild(p);
+      });
+
+      status.textContent = `Rendered ${pages.length} page(s) • ${blocks.length} block(s).`;
+    }
+
+    byId('buildBtn').addEventListener('click', buildBook);
+    byId('sampleBtn').addEventListener('click', () => {
+      rawText.value = `CHAPTER 1\n\nA cold rain drew silver lines down the station windows as Mara unfolded the letter for the third time. She already knew every crease in the page, every hesitant stroke in her father's handwriting, and still she searched for a different ending.\n\nThe platform loudspeaker crackled. Somewhere beneath the static, a train number dissolved into echoes and footsteps.\n\nCHAPTER 2\n\nBy noon the city had warmed, but the library kept its winter chill. Dust drifted through shafts of light while Mara traced the map laid open before her.`;
+      buildBook();
+    });
+    byId('printBtn').addEventListener('click', () => window.print());
+
+    buildBook();
   </script>
 </body>
 </html>
